@@ -16,9 +16,7 @@
         <hr>
 
         <div>
-            <a href="{% url "home" %}{{ topic.name }}">
-                All
-            </a>
+            <a href="{% url "home" %}{{ topic.name }}">All</a>
         </div>
 
         {% for topic in topics %}
@@ -35,8 +33,10 @@
         <a href="{% url "create-room" %}">Create Room</a>
         {% for room in rooms %}
         <div>
+            {% if request.user == room.host %}
             <a href="{% url "update-room" room.id %}">Edit</a>
             <a href="{% url "delete-room" room.id %}">Delete</a>
+            {% endif %}
             <span>@{{ room.host.username }}</span>
             <h4>
                 {{ room.id }} - 
