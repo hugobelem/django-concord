@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.db.models import Q
 
 from . models import Room, Topic, Message
-from . forms import RoomForm
+from . forms import RoomForm, UserForm
 
 
 def login_page(request):
@@ -69,7 +69,7 @@ def home(request):
         Q(description__icontains=search)
         )
 
-    topics = Topic.objects.all()
+    topics = Topic.objects.all()[0:4]
     room_count = rooms.count()
     room_messages = Message.objects.filter(
         Q(room__topic__name__icontains=search)
@@ -185,3 +185,32 @@ def delete_message(request, pk):
         return redirect('home')
 
     return render(request, 'base/delete.html', {'obj': message})
+
+
+@login_required(login_url='/login')
+def update_user(request):
+    user = request.user
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', pk=user.id)
+
+    return render(request, 'base/update_user.html', {'form': form})
+
+
+def topics_page(request):
+    search = request.GET.get('search') \
+    if request.GET.get('search') != None else ''
+        
+    topics = Topic.objects.filter(name__icontains=search)
+    return render(request, 'base/topics.html', {'topics': topics})
+
+
+def activity_page(request):
+    room_messages = Message.objects.all()
+
+    return render(request, 'base/activity.html',
+                  {'room_messages': room_messages})
